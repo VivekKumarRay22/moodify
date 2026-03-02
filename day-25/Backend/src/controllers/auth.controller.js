@@ -120,20 +120,7 @@ async function logoutUser(req, res) {
     res.status(200).json({
         message: "logout successfully."
     })
-
 }
 
 
-/**
- * key value
- * js object
- * {
- *  username:'test',
- *  email:'test@test.com'
- * }
- */
-
-
 module.exports = { registerUser, loginUser, getMe, logoutUser }
-
-
