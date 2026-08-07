@@ -97,65 +97,72 @@ const FaceExpression = () => {
 
             const emotions = [
                 {
+                    name: "😉 Left Wink",
+                    check: () =>
+                        data.eyeBlinkLeft > 0.35
+                },
+                {
+                    name: "😉 Right Wink",
+                    check: () =>
+                        data.eyeBlinkRight > 0.35
+                }, {
+                    name: "😊 Happy",
+                    check: () =>
+                        data.mouthSmileLeft > 0.30 &&
+                        data.mouthSmileRight > 0.30 &&
+                        data.jawOpen < 0.0039,
+
+                },
+                {
                     name: "😂 Laughing",
                     check: () =>
-                        data.mouthSmileLeft > 0.15 &&
+                        data.mouthSmileLeft > 0.15 ||
                         data.mouthSmileRight > 0.15 &&
                         data.jawOpen > 0.39,
+                },
+                {
+                    name: "😨 Fear",
+                    check: () =>
+                        (data.eyeWideLeft > 0.15 ||
+                            data.eyeWideRight > 0.15) &&
+                        data.browInnerUp > 0.15 &&
+                        (data.browOuterUpRight > 0.3 ||
+                            data.browOuterUpLeft > 0.3) &&
+                        (data.eyeLookDownLeft > 0.3 ||
+                            data.eyeLookDownRight > 0.3)
                 },
                 {
                     name: "😲 Surprised",
                     check: () =>
                         data.jawOpen > 0.025 &&
-                        data.browInnerUp > 0.15,
+                        data.browInnerUp > 0.15 &&
+                        (data.browOuterUpRight > 0.3 ||
+                            data.browOuterUpLeft > 0.3)
                 },
+
                 {
-                    name: "😨 Fear",
+                    name: "😢 Sad",
                     check: () =>
-                        data.eyeWideLeft > 0.15 &&
-                        data.eyeWideRight > 0.15 &&
-                        data.jawOpen > 0.025,
+                        (data.browDownLeft > 0.3 ||
+                            data.browDownRight > 0.3) &&
+                        (data.mouthFrownLeft > 0.03 ||
+                            data.mouthFrownRight > 0.03) &&
+                        (data.mouthPressLeft > 0.025 ||
+                            data.mouthPressRight > 0.025)
+
+
                 },
                 {
                     name: "😡 angry",
                     check: () =>
-                        data.browDownLeft > 0.025 ||
-                        data.browDownRight > 0.025 &&
-                        data.mouthPressLeft > 0.025 ||
-                        data.mouthPressRight > 0.025
-
-                },
-                {
-                    name: "😢 Sad",
-                    check: () =>
-                        data.browDownLeft > 0.3 &&
-                        data.browDownRight > 0.3,
-                },
-                {
-                    name: "🤢 Disgust",
-                    check: () =>
-                        data.noseSneerLeft > 0.30 ||
-                        data.noseSneerRight > 0.30,
+                        (data.browDownLeft > 0.025 ||
+                            data.browDownRight > 0.025) &&
+                        (data.mouthPressLeft > 0.025 ||
+                            data.mouthPressRight > 0.025) &&
+                        (data.eyeSquintRight > 0.025 ||
+                            data.eyeSquintLeft > 0.025)
                 },
 
-                {
-                    name: "😊 Happy",
-                    check: () =>
-                        data.mouthSmileLeft > 0.30 &&
-                        data.mouthSmileRight > 0.30,
-                },
-                {
-                    name: "😉 Left Wink",
-                    check: () =>
-                        data.eyeBlinkLeft > 0.45 &&
-                        data.eyeBlinkRight < 0.20,
-                },
-                {
-                    name: "😉 Right Wink",
-                    check: () =>
-                        data.eyeBlinkRight > 0.045 &&
-                        data.eyeBlinkLeft < 0.020,
-                },
                 {
                     name: "😴 Eyes Closed",
                     check: () =>
@@ -206,6 +213,8 @@ const FaceExpression = () => {
             <h2>{expression}</h2>
 
             <button onClick={detectExpression}>Detect Expressions</button>
+
+
 
             <div
                 style={{
