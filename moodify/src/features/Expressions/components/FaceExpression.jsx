@@ -61,145 +61,123 @@ const FaceExpression = () => {
         startCamera();
     }, []);
 
-    // Detect face continuously
-    useEffect(() => {
-        if (loading) return;
+    const detectExpression = () => {
+        if (
+            !videoRef.current ||
+            videoRef.current.readyState !== 4 ||
+            !faceLandmarkerRef.current
+        ) {
+            return;
+        }
 
-        const detect = () => {
-            if (
-                videoRef.current &&
-                videoRef.current.readyState === 4 &&
-                faceLandmarkerRef.current
-            ) {
-                const result = faceLandmarkerRef.current.detectForVideo(
-                    videoRef.current,
-                    performance.now()
-                );
+        const result = faceLandmarkerRef.current.detectForVideo(
+            videoRef.current,
+            performance.now()
+        );
 
-                if (
-                    result.faceBlendshapes &&
-                    result.faceBlendshapes.length > 0
-                ) {
-                    const categories =
-                        result.faceBlendshapes[0].categories;
+        if (
+            result.faceBlendshapes &&
+            result.faceBlendshapes.length > 0
+        ) {
+            const categories = result.faceBlendshapes[0].categories;
 
-                    setBlendShapes(categories);
+            setBlendShapes(categories);
 
-                    const data = {};
+            const data = {};
 
-                    categories.forEach((item) => {
-                        data[item.categoryName] = item.score;
-                    });
+            categories.forEach((item) => {
+                data[item.categoryName] = item.score;
+            });
 
-                    let emotion = "😐 Neutral";
 
-                    // Happy
-                    if (
-                        data.mouthSmileLeft > 0.6 &&
-                        data.mouthSmileRight > 0.6
-                    ) {
-                        emotion = "😊 Happy";
-                    }
+            /**
+             * *name of the approach
+             * ? Rule-Based Approach ⭐ (Sabse common) or Data-Driven Approach ⭐ or Configuration-Based Logic ⭐
+             */
 
-                    // Laughing
-                    else if (
-                        data.mouthSmileLeft > 0.75 &&
-                        data.mouthSmileRight > 0.75 &&
-                        data.jawOpen > 0.35
-                    ) {
-                        emotion = "😂 Laughing";
-                    }
+            const emotions = [
+                {
+                    name: "😂 Laughing",
+                    check: () =>
+                        data.mouthSmileLeft > 0.15 &&
+                        data.mouthSmileRight > 0.15 &&
+                        data.jawOpen > 0.39,
+                },
+                {
+                    name: "😲 Surprised",
+                    check: () =>
+                        data.jawOpen > 0.025 &&
+                        data.browInnerUp > 0.15,
+                },
+                {
+                    name: "😨 Fear",
+                    check: () =>
+                        data.eyeWideLeft > 0.15 &&
+                        data.eyeWideRight > 0.15 &&
+                        data.jawOpen > 0.025,
+                },
+                {
+                    name: "😡 angry",
+                    check: () =>
+                        data.browDownLeft > 0.025 ||
+                        data.browDownRight > 0.025 &&
+                        data.mouthPressLeft > 0.025 ||
+                        data.mouthPressRight > 0.025
 
-                    // Surprised
-                    else if (
-                        data.jawOpen > 0.6 &&
-                        data.browInnerUp > 0.55
-                    ) {
-                        emotion = "😲 Surprised";
-                    }
+                },
+                {
+                    name: "😢 Sad",
+                    check: () =>
+                        data.browDownLeft > 0.3 &&
+                        data.browDownRight > 0.3,
+                },
+                {
+                    name: "🤢 Disgust",
+                    check: () =>
+                        data.noseSneerLeft > 0.30 ||
+                        data.noseSneerRight > 0.30,
+                },
 
-                    // Sad
-                    else if (
-                        data.mouthFrownLeft > 0.45 &&
-                        data.mouthFrownRight > 0.45
-                    ) {
-                        emotion = "😢 Sad";
-                    }
+                {
+                    name: "😊 Happy",
+                    check: () =>
+                        data.mouthSmileLeft > 0.30 &&
+                        data.mouthSmileRight > 0.30,
+                },
+                {
+                    name: "😉 Left Wink",
+                    check: () =>
+                        data.eyeBlinkLeft > 0.45 &&
+                        data.eyeBlinkRight < 0.20,
+                },
+                {
+                    name: "😉 Right Wink",
+                    check: () =>
+                        data.eyeBlinkRight > 0.045 &&
+                        data.eyeBlinkLeft < 0.020,
+                },
+                {
+                    name: "😴 Eyes Closed",
+                    check: () =>
+                        data.eyeBlinkLeft > 0.60 &&
+                        data.eyeBlinkRight > 0.60,
+                },
+                {
+                    name: "😮 Mouth Open",
+                    check: () =>
+                        data.jawOpen > 0.45,
+                },
+            ];
 
-                    // Angry
-                    else if (
-                        data.browDownLeft > 0.55 &&
-                        data.browDownRight > 0.55 &&
-                        data.mouthPressLeft > 0.25 &&
-                        data.mouthPressRight > 0.25
-                    ) {
-                        emotion = "😠 Angry";
-                    }
+            const detected = emotions.find((emotion) => emotion.check());
 
-                    // Fear
-                    else if (
-                        data.eyeWideLeft > 0.5 &&
-                        data.eyeWideRight > 0.5 &&
-                        data.jawOpen > 0.4
-                    ) {
-                        emotion = "😨 Fear";
-                    }
-
-                    // Disgust
-                    else if (
-                        data.noseSneerLeft > 0.45 ||
-                        data.noseSneerRight > 0.45
-                    ) {
-                        emotion = "🤢 Disgust";
-                    }
-
-                    // Wink Left
-                    else if (
-                        data.eyeBlinkLeft > 0.8 &&
-                        data.eyeBlinkRight < 0.2
-                    ) {
-                        emotion = "😉 Left Wink";
-                    }
-
-                    // Wink Right
-                    else if (
-                        data.eyeBlinkRight > 0.8 &&
-                        data.eyeBlinkLeft < 0.2
-                    ) {
-                        emotion = "😉 Right Wink";
-                    }
-
-                    // Both Eyes Closed
-                    else if (
-                        data.eyeBlinkLeft > 0.8 &&
-                        data.eyeBlinkRight > 0.8
-                    ) {
-                        emotion = "😑 Eyes Closed";
-                    }
-
-                    // Mouth Open
-                    else if (
-                        data.jawOpen > 0.7
-                    ) {
-                        emotion = "😮 Mouth Open";
-                    }
-
-                    setExpression(emotion);
-                } else {
-                    setExpression("No Face Detected");
-                }
-            }
-
-            animationFrameRef.current =
-                requestAnimationFrame(detect);
-        };
-
-        detect();
-
-        return () => {
-            cancelAnimationFrame(animationFrameRef.current);
-        };
-    }, [loading]);
+            setExpression(
+                detected ? detected.name : "😐 Neutral"
+            );
+        } else {
+            setExpression("No Face Detected");
+        }
+    };
 
     return (
         <div
@@ -227,6 +205,8 @@ const FaceExpression = () => {
 
             <h2>{expression}</h2>
 
+            <button onClick={detectExpression}>Detect Expressions</button>
+
             <div
                 style={{
                     width: "700px",
@@ -236,7 +216,8 @@ const FaceExpression = () => {
                     padding: "10px",
                 }}
             >
-                <h3>Blend Shapes</h3>
+
+                <h3>   Blend Shapes</h3>
 
                 {blendShapes.map((item) => (
                     <div
