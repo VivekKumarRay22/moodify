@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@imagekit/nodejs": "^7.3.0",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
@@ -18,6 +19,8 @@
     "express": "^5.2.1",
     "ioredis": "^5.10.0",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.2.2"
+    "mongoose": "^9.2.2",
+    "multer": "^2.1.0",
+    "node-id3": "^0.2.9"
   }
 }
